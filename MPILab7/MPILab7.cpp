@@ -28,6 +28,7 @@ int task1(int argc, char** argv, int N) {
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
+    int start_time = MPI_Wtime();
 
     // Вычисление диапазона индексов для каждого процесса
     int base_chunk_size = N / world_size;
@@ -43,10 +44,12 @@ int task1(int argc, char** argv, int N) {
     double total_sum = 0;
     MPI_Reduce(&local_sum, &total_sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
+    MPI_Barrier(MPI_COMM_WORLD);
     if (world_rank == 0) {
         std::cout << std::format("ln2 = {}", total_sum);
+        int end_time = MPI_Wtime();
+        std::cout << "\nProccessed time " << end_time - start_time << '\n';
     }
-    
     MPI_Finalize();
 
     return 0;
@@ -57,6 +60,8 @@ int task1_par(int argc, char** argv, int N) {
     int world_rank, world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    int start_time = MPI_Wtime();
 
     // Вычисление диапазона индексов для каждого процесса
     int base_chunk_size = N / world_size;
@@ -87,6 +92,10 @@ int task1_par(int argc, char** argv, int N) {
 
         std::cout << std::format("ln2 = {}\n", total_sum);
     }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    int end_time = MPI_Wtime();
+    std::cout << "\nProccessed time " << end_time - start_time << '\n';
 
     MPI_Finalize();
     return 0;
@@ -129,6 +138,7 @@ int task2(int argc, char** argv, int N) {
         print_array(full_array);
     }
     MPI_Barrier(MPI_COMM_WORLD);
+    int start_time = MPI_Wtime();
 
     // Вычисление размера части массива для каждого процесса
     int base_chunk_size = N / world_size;
@@ -164,7 +174,10 @@ int task2(int argc, char** argv, int N) {
     int global_sorted = 0;
     MPI_Reduce(&local_sorted, &global_sorted, 1, MPI_INT, MPI_MIN, 0, MPI_COMM_WORLD);
 
+    MPI_Barrier(MPI_COMM_WORLD);
     if (world_rank == 0) {
+        int end_time = MPI_Wtime();
+        std::cout << "\nProccessed time " << end_time - start_time << '\n';
         if (global_sorted) {
             std::cout << "Ordered\n";
         }
@@ -233,7 +246,7 @@ int task3(int argc, char** argv, int N) {
         std::cout << '\n';
     }
     MPI_Barrier(MPI_COMM_WORLD);
-
+    int start_time = MPI_Wtime();
     // Вычисление размера части массива для каждого процесса
     int base_chunk_size = N / world_size;
     int remainder = N % world_size;
@@ -275,7 +288,12 @@ int task3(int argc, char** argv, int N) {
         result, sendcounts, displs, MPI_DOUBLE,
         0, MPI_COMM_WORLD);
 
+    MPI_Barrier(MPI_COMM_WORLD);
+    
+
     if (world_rank == 0) {
+        int end_time = MPI_Wtime();
+        std::cout << "\nProccessed time " << end_time - start_time << '\n';
         print_vector(result, N);
         delete[] matrix_data;
         delete[] matrix_rows;
@@ -479,7 +497,7 @@ int task4(int argc, char** argv, int N) {
 
 int main(int argc, char** argv)
 {
-    //task1(argc, argv, 3);
+    task1(argc, argv, 3);
     //task1_par(argc, argv, 3);
     //task2(argc, argv, 3);
     //task3(argc, argv, 3);
